@@ -5,32 +5,130 @@
         "key": 9,
         "duration": 500,
         "post_delay": 3000,
-        "next": ["MapTeleport_Entry"]
+        "next": ["MapTeleport_VerifyMap"]
     },
-    "MapTeleport_Entry": {
+    "MapTeleport_VerifyMap": {
         "recognition": "DirectHit",
         "action": "Custom",
-        "custom_action": "MapTeleportAct",
-        "post_delay": 1000
+        "custom_action": "MapTeleportVerifyAct",
+        "next": ["MapTeleport_FindTeleportIcon"]
+    },
+    "MapTeleport_FindTeleportIcon": {
+        "recognition": "TemplateMatch",
+        "template": "Map/TeleportIcon.png",
+        "roi": [87, 147, 33, 34],
+        "timeout": 7000,
+        "rate_limit": 1000,
+        "action": "Click",
+        "post_delay": 500,
+        "next": ["MapTeleport_FindSecondaryIcon"],
+        "on_error": ["MapTeleport_FallbackClickTeleportIcon"]
+    },
+    "MapTeleport_FallbackClickTeleportIcon": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [103, 164],
+        "post_delay": 500,
+        "next": ["MapTeleport_FindSecondaryIcon"]
+    },
+    "MapTeleport_FindSecondaryIcon": {
+        "recognition": "TemplateMatch",
+        "template": "Map/SecondaryIcon.png",
+        "roi": [147, 196, 24, 25],
+        "timeout": 7000,
+        "rate_limit": 1000,
+        "action": "Click",
+        "post_delay": 500,
+        "next": ["MapTeleport_FindTransport"],
+        "on_error": ["MapTeleport_FallbackClickSecondaryIcon"]
+    },
+    "MapTeleport_FallbackClickSecondaryIcon": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [159, 208],
+        "post_delay": 500,
+        "next": ["MapTeleport_FindTransport"]
+    },
+    "MapTeleport_FindTransport": {
+        "recognition": "OCR",
+        "roi": [1000, 661, 44, 32],
+        "expected": ["传送"],
+        "timeout": 5000,
+        "rate_limit": 1000,
+        "action": "Click",
+        "post_delay": 500,
+        "next": ["MapTeleport_WaitLanding"],
+        "on_error": ["MapTeleport_FallbackClickTransport"]
+    },
+    "MapTeleport_FallbackClickTransport": {
+        "recognition": "DirectHit",
+        "action": "Click",
+        "target": [1022, 677],
+        "post_delay": 5000,
+        "next": ["MapTeleport_WaitEnter"]
+    },
+    "MapTeleport_WaitLanding": {
+        "recognition": "DirectHit",
+        "action": "DoNothing",
+        "post_delay": 5000,
+        "next": ["MapTeleport_WaitEnter"]
+    },
+    "MapTeleport_WaitEnter": {
+        "recognition": "OCR",
+        "roi": [68, 696, 30, 12],
+        "expected": ["Enter"],
+        "timeout": 20000,
+        "rate_limit": 1000,
+        "next": ["MapTeleport_FindDialog"]
+    },
+    "MapTeleport_FindDialog": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "MapTeleportFindDialogAct",
+        "next": ["MapTeleport_CheckDialogSelected"]
+    },
+    "MapTeleport_CheckDialogSelected": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "MapTeleportCheckSelectedAct",
+        "next": ["MapTeleport_PressF"],
+        "on_error": ["MapTeleport_ScrollDown"]
     },
     "MapTeleport_ScrollDown": {
         "recognition": "DirectHit",
+        "max_hit": 10,
         "action": "Scroll",
         "target": [766, 357, 184, 121],
         "dy": -120,
-        "post_delay": 500
+        "post_delay": 500,
+        "next": ["MapTeleport_CheckDialogSelected"]
     },
     "MapTeleport_PressF": {
         "recognition": "DirectHit",
         "action": "ClickKey",
         "key": 70,
-        "post_delay": 1000
+        "post_delay": 1000,
+        "next": ["MapTeleport_FindShop"]
+    },
+    "MapTeleport_FindShop": {
+        "recognition": "OCR",
+        "roi": [976, 503, 40, 25],
+        "expected": ["商店"],
+        "timeout": 10000,
+        "rate_limit": 1000,
+        "next": ["MapTeleport_Press1"]
     },
     "MapTeleport_Press1": {
         "recognition": "DirectHit",
         "action": "ClickKey",
         "key": 49,
-        "post_delay": 1000
+        "post_delay": 1000,
+        "next": ["MapTeleport_BuyLoop"]
+    },
+    "MapTeleport_BuyLoop": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "MapTeleportBuyLoopAct"
     },
     "MapTeleport_PressEsc": {
         "recognition": "DirectHit",
