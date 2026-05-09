@@ -1,7 +1,7 @@
 {
     "task": [
         {
-            "name": "地图传送",
+            "name": "远哥购物",
             "entry": "MapTeleport_OpenMap",
             "option": [
                 "地图快捷键",
