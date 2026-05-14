@@ -1,38 +1,16 @@
 {
     "task": [
         {
-            "name": "传说精灵",
-            "entry": "AutoBattle_Entry",
+            "name": "稀兽花种",
+            "entry": "RareBeast_Entry",
             "option": [
-                "使用印记",
-                "技能顺序"
+                "Rare-技能顺序"
             ],
             "group": ["battle"]
         }
     ],
     "option": {
-        "使用印记": {
-            "type": "select",
-            "default_case": "不使用",
-            "cases": [
-                {
-                    "name": "不使用",
-                    "label": "不使用"
-                },
-                {
-                    "name": "使用",
-                    "label": "使用",
-                    "pipeline_override": {
-                        "AutoBattle_UseMark": {
-                            "attach": {
-                                "use_mark": "true"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "技能顺序": {
+        "Rare-技能顺序": {
             "type": "input",
             "inputs": [
                 {
@@ -45,7 +23,7 @@
                 }
             ],
             "pipeline_override": {
-                "AutoBattle_WaitReady": {
+                "RareBeast_WaitReady": {
                     "attach": {
                         "skill_order": "{skill_order}"
                     }

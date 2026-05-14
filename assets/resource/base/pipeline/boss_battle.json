@@ -1,0 +1,87 @@
+{
+    "BossBattle_Entry": {
+        "recognition": "OCR",
+        "roi": [1234, 673, 9, 11],
+        "expected": ["R"],
+        "action": "DoNothing",
+        "post_delay": 500,
+        "timeout": -1,
+        "next": "BossBattle_Reset"
+    },
+    "BossBattle_Reset": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "BossBattleReset",
+        "next": "BossBattle_WaitSkill1"
+    },
+    "BossBattle_WaitSkill1": {
+        "recognition": "OCR",
+        "roi": [152, 259, 10, 13],
+        "expected": ["1"],
+        "action": "DoNothing",
+        "post_delay": 300,
+        "timeout": 8000,
+        "rate_limit": 500,
+        "next": "BossBattle_ExecuteRound",
+        "on_error": "BossBattle_BattleEndCheck"
+    },
+    "BossBattle_ExecuteRound": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "BossBattleAct",
+        "post_delay": 1500,
+        "next": "BossBattle_WaitSkill1",
+        "on_error": "BossBattle_BattleEndCheck"
+    },
+    "BossBattle_BattleEndCheck": {
+        "recognition": "OCR",
+        "roi": [67, 693, 31, 16],
+        "expected": ["Enter"],
+        "action": "DoNothing",
+        "timeout": 15000,
+        "pre_delay": 5000,
+        "next": "BossBattle_HoldW"
+    },
+    "BossBattle_WaitBackpackR": {
+        "recognition": "OCR",
+        "roi": [1234, 673, 9, 11],
+        "expected": ["R"],
+        "timeout": 5000,
+        "action": "Custom",
+        "custom_action": "InterceptionInput",
+        "custom_action_param": {
+            "type": "click_key",
+            "key": 82
+        },
+        "post_delay": 300
+    },
+    "BossBattle_HoldW": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "BossHoldWAct",
+        "post_delay": 500,
+        "next": "BossBattle_EnterTreasure"
+    },
+    "BossBattle_EnterTreasure": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "InterceptionInput",
+        "custom_action_param": {
+            "type": "click_key",
+            "key": 70
+        },
+        "post_delay": 1000,
+        "next": "BossBattle_UseMark"
+    },
+    "BossBattle_UseMark": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "BossUseMarkAct",
+        "post_delay": 1000,
+        "attach": {"use_mark": false}
+    },
+    "BossBattle_Final": {
+        "recognition": "DirectHit",
+        "action": "DoNothing"
+    }
+}

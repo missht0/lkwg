@@ -1,0 +1,49 @@
+{
+    "RareBeast_Entry": {
+        "recognition": "OCR",
+        "roi": [1234, 673, 9, 11],
+        "expected": ["R"],
+        "action": "DoNothing",
+        "post_delay": 500,
+        "timeout": -1,
+        "next": "RareBeast_Reset"
+    },
+    "RareBeast_Reset": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "RareBeastReset",
+        "next": "RareBeast_WaitReady"
+    },
+    "RareBeast_WaitReady": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "RareBeastWaitAct",
+        "post_delay": 500,
+        "next": "RareBeast_ExecuteRound",
+        "on_error": "RareBeast_Done"
+    },
+    "RareBeast_ExecuteRound": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "RareBeastAct",
+        "post_delay": 1500,
+        "next": "RareBeast_WaitReady"
+    },
+    "RareBeast_WaitBackpackR": {
+        "recognition": "OCR",
+        "roi": [1234, 673, 9, 11],
+        "expected": ["R"],
+        "timeout": 5000,
+        "action": "Custom",
+        "custom_action": "InterceptionInput",
+        "custom_action_param": {
+            "type": "click_key",
+            "key": 82
+        },
+        "post_delay": 300
+    },
+    "RareBeast_Done": {
+        "recognition": "DirectHit",
+        "action": "DoNothing"
+    }
+}

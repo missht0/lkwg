@@ -60,6 +60,8 @@
         "resource/tasks/stone_mine_pet.json",
         "resource/tasks/screenshot.json",
         "resource/tasks/shopping.json",
-        "resource/tasks/daily_claim.json"
+        "resource/tasks/daily_claim.json",
+        "resource/tasks/boss_battle.json",
+        "resource/tasks/rare_beast.json"
     ]
 }

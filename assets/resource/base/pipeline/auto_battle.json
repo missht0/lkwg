@@ -12,45 +12,23 @@
         "recognition": "DirectHit",
         "action": "Custom",
         "custom_action": "AutoBattleReset",
-        "next": "AutoBattle_WaitSkill1"
+        "next": "AutoBattle_WaitReady"
     },
-    "AutoBattle_WaitSkill1": {
-        "recognition": "OCR",
-        "roi": [152, 259, 10, 13],
-        "expected": ["1"],
-        "action": "DoNothing",
-        "post_delay": 300,
-        "timeout": 8000,
-        "rate_limit": 500,
+    "AutoBattle_WaitReady": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "AutoBattleWaitAct",
+        "post_delay": 500,
         "next": "AutoBattle_ExecuteRound",
-        "on_error": "AutoBattle_CheckBattleEnd"
+        "on_error": "AutoBattle_Done"
     },
     "AutoBattle_ExecuteRound": {
         "recognition": "DirectHit",
         "action": "Custom",
         "custom_action": "AutoBattleAct",
         "post_delay": 1500,
-        "next": "AutoBattle_WaitSkill1",
-        "on_error": "AutoBattle_BattleEndCheck"
-    },
-    "AutoBattle_CheckBattleEnd": {
-        "recognition": "OCR",
-        "roi": [1234, 673, 9, 11],
-        "expected": ["R"],
-        "action": "DoNothing",
-        "post_delay": 200,
-        "timeout": 3000,
-        "rate_limit": 500,
-        "next": "AutoBattle_WaitSkill1",
-        "on_error": "AutoBattle_BattleEndCheck"
-    },
-    "AutoBattle_BattleEndCheck": {
-        "recognition": "OCR",
-        "roi": [719, 582, 44, 21],
-        "expected": ["确认"],
-        "action": "DoNothing",
-        "timeout": 15000,
-        "next": "AutoBattle_Done"
+        "next": "AutoBattle_WaitReady",
+        "on_error": "AutoBattle_WaitReady"
     },
     "AutoBattle_WaitBackpackR": {
         "recognition": "OCR",
@@ -77,7 +55,7 @@
         "post_delay": 1000,
         "attach": {"use_mark": false}
     },
-    "Battle_Esc":{
+    "Battle_Esc": {
         "recognition": "TemplateMatch",
         "template": ["Battle/Flag.png"],
         "roi": [1016, 645, 20, 20],

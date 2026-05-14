@@ -36,6 +36,10 @@ _MARK_COLOR_LOWER = np.array([0, 115, 210], dtype=np.uint8)
 _MARK_COLOR_UPPER = np.array([0, 127, 218], dtype=np.uint8)
 
 _MARK_CONFIRM_ROI = [719, 582, 44, 21]
+_SKILL1_ROI = [152, 259, 10, 13]
+_BATTLE_END_ROI = [719, 582, 44, 21]
+
+_WAIT_TIMEOUT = 30
 
 
 def _expand_skill_order(s):
@@ -62,6 +66,56 @@ class AutoBattleReset(CustomAction):
         AutoBattleAct._round_count = 0
         print("[AutoBattle] 状态重置")
         return True
+
+
+@AgentServer.custom_action("AutoBattleWaitAct")
+class AutoBattleWaitAct(CustomAction):
+
+    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        ctrl = context.tasker.controller
+        _update_image_size(ctrl)
+
+        start_time = time.time()
+        while time.time() - start_time < _WAIT_TIMEOUT:
+            ctrl.post_screencap().wait()
+            image = ctrl.cached_image
+            if image is None:
+                time.sleep(0.3)
+                continue
+
+            end_result = context.run_recognition(
+                "AutoBattleEndDetect",
+                image,
+                pipeline_override={
+                    "AutoBattleEndDetect": {
+                        "recognition": "OCR",
+                        "roi": _BATTLE_END_ROI,
+                        "expected": ["确认"],
+                    }
+                },
+            )
+            if end_result is not None and end_result.hit:
+                print("[AutoBattle] 检测到确认，战斗结束")
+                return False
+
+            skill1_result = context.run_recognition(
+                "AutoBattleSkill1Detect",
+                image,
+                pipeline_override={
+                    "AutoBattleSkill1Detect": {
+                        "recognition": "OCR",
+                        "roi": _SKILL1_ROI,
+                        "expected": ["1"],
+                    }
+                },
+            )
+            if skill1_result is not None and skill1_result.hit:
+                return True
+
+            time.sleep(0.3)
+
+        print("[AutoBattle] 等待超时，结束任务")
+        return False
 
 
 @AgentServer.custom_action("AutoBattleUseMarkAct")
@@ -126,10 +180,9 @@ class AutoBattleUseMarkAct(CustomAction):
 
         print("[AutoBattle] >>> 确认选择 (空格)")
         ic.click_key(0x20)
-        time.sleep(5)
+        time.sleep(0.5)
 
-        print("[AutoBattle] >>> 关闭结算 (ESC)")
-        ic.click_key(0x1B)
+        context.run_task("Battle_Esc")
         time.sleep(0.5)
 
         return True
@@ -146,10 +199,11 @@ class AutoBattleAct(CustomAction):
         _update_image_size(ctrl)
         ic = get_controller()
 
-        node_obj = context.get_node_object("AutoBattle_WaitSkill1")
+        node_obj = context.get_node_object("AutoBattle_WaitReady")
         attach = getattr(node_obj, "attach", {}) if node_obj else {}
         skill_order = attach.get("skill_order", "||1x")
         skill_order = _expand_skill_order(skill_order.strip())
+
         if not skill_order:
             return False
 
@@ -203,23 +257,23 @@ class AutoBattleAct(CustomAction):
                 AutoBattleAct._skill_index = idx
                 print("[AutoBattle] >>> 等待R出现并关闭背包 (r)")
                 context.run_task("AutoBattle_WaitBackpackR")
-                context.run_task("AutoBattle_WaitSkill1")
+                context.run_task("AutoBattle_WaitReady")
                 return idx
             elif ch in ("q", "Q"):
                 AutoBattleAct._skill_index = idx
                 print("[AutoBattle] >>> 关闭背包后重新打开 (未匹配r，自动关闭)")
                 context.run_task("AutoBattle_WaitBackpackR")
-                context.run_task("AutoBattle_WaitSkill1")
+                context.run_task("AutoBattle_WaitReady")
                 return idx
             else:
                 print(f"[AutoBattle] 背包内遇到非物品字符: {ch}，自动关闭背包")
                 AutoBattleAct._skill_index = idx
                 context.run_task("AutoBattle_WaitBackpackR")
-                context.run_task("AutoBattle_WaitSkill1")
+                context.run_task("AutoBattle_WaitReady")
                 return idx
 
         AutoBattleAct._skill_index = idx
         print("[AutoBattle] >>> 等待R出现并关闭背包 (r)")
         context.run_task("AutoBattle_WaitBackpackR")
-        context.run_task("AutoBattle_WaitSkill1")
+        context.run_task("AutoBattle_WaitReady")
         return idx

@@ -12,7 +12,7 @@
     },
     "DailyClaim_WaitPage": {
         "recognition": "OCR",
-        "roi": [917, 665, 86, 24],
+        "roi": [210, 180, 86, 30],
         "expected": ["通行证"],
         "action": "DoNothing",
         "post_delay": 500,
@@ -51,7 +51,14 @@
     },
     "DailyClaim_Confirm": {
         "recognition": "DirectHit",
-        "action": "DoNothing",
+        "action": "Custom",
+        "custom_action": "InterceptionInput",
+          "custom_action_param": {
+            "type": "click_key",
+            "key": 27
+        },
+        "repeat": 3,
+        "repeat_delay": 500,
         "timeout": -1
     },
     "DailyClaim_Done": {
