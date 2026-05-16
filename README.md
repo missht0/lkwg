@@ -83,6 +83,8 @@ python -m pip install -r .\agent\requirements.txt
 py -3 -m pip install -r .\agent\requirements.txt
 ```
 
+正式包也内置了 `agent/bootstrap.py`：如果你忘记手动安装依赖，它会在 Agent 首次启动时自动把依赖安装到 `agent/.deps`。如果电脑无法联网，建议提前执行上面的命令。
+
 ### 3. 安装 Interception 驱动
 
 本项目的游戏内输入依赖 Interception 驱动。首次使用前需要安装一次，并重启电脑。

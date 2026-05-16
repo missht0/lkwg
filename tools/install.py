@@ -129,7 +129,7 @@ def install_resource():
         interface = jsonc.load(f)
         
     interface["version"] = version
-    interface["agent"]["child_args"] = ["./agent/main.py"]
+    interface["agent"]["child_args"] = ["./agent/bootstrap.py"]
 
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
         jsonc.dump(interface, f, ensure_ascii=False, indent=4)
