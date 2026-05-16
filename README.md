@@ -67,11 +67,11 @@ MaaLK 是一个基于 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 的
 
 如果使用正式 tag 发布，也可以从 `Releases` 页面下载对应的 zip 包。
 
-### 2. 安装 Python 运行依赖
+### 2. Python 运行依赖
 
-本项目的自定义 Agent 使用 Python 运行。安装包不会内置 Python，请先安装 Python 3.10 或更新版本，并确保 `python` 可以在命令行中运行。
+GitHub Actions 生成的正式包已经内置 Windows x64 Python 运行时和 Agent 依赖，正常情况下不需要手动安装 Python 包。
 
-在安装包解压目录执行：
+如果你是从源码运行，或想手动修复依赖，可以在项目/安装包目录执行：
 
 ```powershell
 python -m pip install -r .\agent\requirements.txt
@@ -83,7 +83,7 @@ python -m pip install -r .\agent\requirements.txt
 py -3 -m pip install -r .\agent\requirements.txt
 ```
 
-正式包也内置了 `agent/bootstrap.py`：如果你忘记手动安装依赖，它会在 Agent 首次启动时自动把依赖安装到 `agent/.deps`。如果电脑无法联网，建议提前执行上面的命令。
+正式包仍保留 `agent/bootstrap.py`：如果内置依赖缺失，它会尝试把依赖安装到 `agent/.deps` 作为兜底。
 
 ### 3. 安装 Interception 驱动
 

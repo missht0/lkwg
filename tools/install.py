@@ -129,6 +129,8 @@ def install_resource():
         interface = jsonc.load(f)
         
     interface["version"] = version
+    if os_name == "win" and arch == "x86_64":
+        interface["agent"]["child_exec"] = "./python/python.exe"
     interface["agent"]["child_args"] = ["./agent/bootstrap.py"]
 
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
