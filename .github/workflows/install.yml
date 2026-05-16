@@ -73,7 +73,7 @@ jobs:
 
   install:
     needs: meta
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [win]
@@ -109,60 +109,74 @@ jobs:
 
       - name: Clean up MFAAvalonia archive
         if: matrix.os != 'android'
-        shell: pwsh
+        shell: bash
         run: |
-          $files = '${{ steps.download_mfa.outputs.downloaded_files }}' | ConvertFrom-Json
-          Remove-Item -LiteralPath $files[0] -Force
-          Write-Host "Archive cleanup command executed for MFAAvalonia."
+          ARCHIVE_FILE_PATH="${{ fromJson(steps.download_mfa.outputs.downloaded_files)[0] }}"
+          rm -f "${ARCHIVE_FILE_PATH}"
+          echo "Archive cleanup command executed for MFAAvalonia."
 
       - name: Remove built-in runtime in MFA
         if: matrix.os != 'android'
-        shell: pwsh
+        shell: bash
         run: |
-          Remove-Item -LiteralPath MFA/runtimes -Recurse -Force -ErrorAction SilentlyContinue
+          rm -rf MFA/runtimes
       
       - name: Install
-        shell: pwsh
+        shell: bash
         run: |
-          if ("${{ matrix.os }}" -ne "android") {
-            if (Test-Path MFA) {
-              Write-Host "Copying MFA files to install directory..."
-              New-Item -ItemType Directory -Force install | Out-Null
-              Copy-Item -Path MFA/* -Destination install -Recurse -Force
-              Write-Host "MFA files copied successfully."
-            } else {
-              Write-Host "MFA directory not found, skipping copy."
-            }
-          } else {
-            Write-Host "Skipping copy MFA for Android."
-          }
+          if [[ "${{ matrix.os }}" != "android" ]]; then
+            if [ -d "MFA" ]; then
+              echo "Copying MFA files to install directory..."
+              mkdir -p install
+              rsync -av --ignore-existing MFA/ install/
+              echo "MFA files copied successfully."
+            else
+              echo "MFA directory not found, skipping copy."
+            fi
+          else
+            echo "Skipping copy MFA for Android."
+          fi
 
-          Push-Location tools
+          cd tools/
           python -m pip install -r ./requirements.txt
           python ./install.py ${{ needs.meta.outputs.tag }} ${{ matrix.os }} ${{ matrix.arch }}
-          Pop-Location
+          cd ..
 
       - name: Bundle Python runtime and agent dependencies
         if: matrix.os == 'win' && matrix.arch == 'x86_64'
-        shell: pwsh
+        shell: bash
         run: |
-          $pythonVersion = "3.11.9"
-          $pythonTag = "311"
-          $pythonDir = "install/python"
-          $pythonZip = "python-embed.zip"
-          $pythonUrl = "https://www.python.org/ftp/python/$pythonVersion/python-$pythonVersion-embed-amd64.zip"
-          $getPipUrl = "https://bootstrap.pypa.io/get-pip.py"
+          PYTHON_VERSION="3.11.9"
+          PYTHON_TAG="311"
+          PYTHON_DIR="install/python"
+          SITE_PACKAGES="$PYTHON_DIR/Lib/site-packages"
+          PYTHON_ZIP="python-embed.zip"
+          PYTHON_URL="https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 
-          Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonZip
-          Expand-Archive -Path $pythonZip -DestinationPath $pythonDir -Force
+          curl -L "$PYTHON_URL" -o "$PYTHON_ZIP"
+          python - <<'PY'
+          import zipfile
+          from pathlib import Path
 
-          $pthFile = Join-Path $pythonDir "python$pythonTag._pth"
-          (Get-Content $pthFile) -replace "#import site", "import site" | Set-Content $pthFile -Encoding ASCII
+          zip_path = Path("python-embed.zip")
+          out_dir = Path("install/python")
+          out_dir.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(zip_path) as zf:
+              zf.extractall(out_dir)
+          PY
 
-          Invoke-WebRequest -Uri $getPipUrl -OutFile "get-pip.py"
-          & "$pythonDir/python.exe" "get-pip.py" --no-warn-script-location
-          & "$pythonDir/python.exe" -m pip install --no-warn-script-location --upgrade -r "agent/requirements.txt"
-          & "$pythonDir/python.exe" -c "import maa, numpy; print('bundled python ok')"
+          sed -i "s/#import site/import site/" "$PYTHON_DIR/python$PYTHON_TAG._pth"
+          mkdir -p "$SITE_PACKAGES"
+
+          python -m pip install --upgrade --target "$SITE_PACKAGES" pip setuptools wheel
+          python -m pip install --upgrade \
+            --target "$SITE_PACKAGES" \
+            --platform win_amd64 \
+            --implementation cp \
+            --python-version 3.11 \
+            --abi cp311 \
+            --only-binary=:all: \
+            -r agent/requirements.txt
 
       - uses: actions/upload-artifact@v4
         with:
