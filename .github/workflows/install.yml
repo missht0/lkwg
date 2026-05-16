@@ -178,7 +178,7 @@ jobs:
             --only-binary=:all: \
             -r agent/requirements.txt
 
-      - name: Bundle Interception DLL
+      - name: Bundle Interception driver helper
         if: matrix.os == 'win' && matrix.arch == 'x86_64'
         shell: bash
         run: |
@@ -189,7 +189,21 @@ jobs:
           curl -L "$INTERCEPTION_URL" -o "$INTERCEPTION_ZIP"
           unzip -q "$INTERCEPTION_ZIP" -d interception
           mkdir -p install/resource/base/Dll
+          mkdir -p install/driver/interception
           cp interception/Interception/library/x64/interception.dll install/resource/base/Dll/interception.dll
+          cp "interception/Interception/command line installer/install-interception.exe" install/driver/interception/install-interception.exe
+          cp tools/driver/Install_Interception_Driver.bat install/Install_Interception_Driver.bat
+          cp tools/driver/Uninstall_Interception_Driver.bat install/Uninstall_Interception_Driver.bat
+          python - <<'PY'
+          from pathlib import Path
+
+          for path in (
+              Path("install/Install_Interception_Driver.bat"),
+              Path("install/Uninstall_Interception_Driver.bat"),
+          ):
+              text = path.read_text(encoding="utf-8")
+              path.write_bytes(text.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\r\n").encode("utf-8"))
+          PY
 
       - uses: actions/upload-artifact@v4
         with:

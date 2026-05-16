@@ -94,26 +94,19 @@ python -m pip install -r .\agent\requirements.txt
 
 ### 3. 安装 Interception 驱动
 
-本项目的游戏内输入依赖 Interception 驱动。正式包已经内置 `interception.dll`，但首次使用前仍需要安装驱动本体，并重启电脑。
+本项目的游戏内输入依赖 Interception 驱动。正式包已经内置 `interception.dll` 和驱动安装器，但首次使用前仍需要安装驱动本体，并重启电脑。
 
-1. 下载 [Interception](https://github.com/oblitum/Interception)。
-2. 解压后，以管理员身份打开 PowerShell 或 CMD。
-3. 进入 `command line installer` 目录。
-4. 执行：
+1. 在 MaaLK 解压目录中双击 `Install_Interception_Driver.bat`。
+2. 在 Windows 弹出的管理员权限确认窗口中选择允许。
+3. 看到安装完成提示后，重启电脑。
 
-```powershell
-.\install-interception.exe /install
-```
+卸载驱动时双击 `Uninstall_Interception_Driver.bat`，完成后同样需要重启。
 
-5. 重启电脑。
-
-卸载驱动时使用：
+如果双击脚本失败，也可以手动运行：
 
 ```powershell
-.\install-interception.exe /uninstall
+.\driver\interception\install-interception.exe /install
 ```
-
-然后同样需要重启。
 
 ### 4. 启动 MaaLK
 
