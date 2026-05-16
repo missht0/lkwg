@@ -61,13 +61,19 @@ def _setup_logging():
     return log_file
 
 
-def _prepend_deps_path() -> None:
+def _prepend_runtime_paths() -> None:
+    agent_path = str(AGENT_DIR)
+    if agent_path not in sys.path:
+        sys.path.insert(0, agent_path)
+
     if DEPS_DIR.exists():
-        sys.path.insert(0, str(DEPS_DIR))
+        deps_path = str(DEPS_DIR)
+        if deps_path not in sys.path:
+            sys.path.insert(0, deps_path)
 
 
 def _deps_ready() -> bool:
-    _prepend_deps_path()
+    _prepend_runtime_paths()
     missing = [module for module in REQUIRED_MODULES if importlib.util.find_spec(module) is None]
     if missing:
         print(f"[Bootstrap] Missing modules: {missing}")
@@ -100,6 +106,7 @@ def _install_deps() -> None:
 def main() -> None:
     log_file = _setup_logging()
     try:
+        _prepend_runtime_paths()
         if not _deps_ready():
             _install_deps()
             if not _deps_ready():

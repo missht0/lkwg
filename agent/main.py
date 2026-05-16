@@ -144,10 +144,9 @@ def main():
 
         logger.write("Custom modules imported successfully.\n")
 
-        from custom.interception_controller import get_controller
-        interception_ctrl = get_controller()
-
         try:
+            from custom.interception_controller import get_controller
+            interception_ctrl = get_controller()
             interception_ctrl.initialize()
             logger.write("[Interception] Context initialized.\n")
 
@@ -174,6 +173,7 @@ def main():
             logger.write(f"[Interception] Initialization failed: {e}\n")
             logger.write(f"[Interception] {traceback.format_exc()}\n")
             logger.write("[Interception] Continuing without Interception input.\n")
+            interception_ctrl = None
 
         logger.write(f"Starting AgentServer with identifier: {identifier}\n")
 

@@ -178,6 +178,19 @@ jobs:
             --only-binary=:all: \
             -r agent/requirements.txt
 
+      - name: Bundle Interception DLL
+        if: matrix.os == 'win' && matrix.arch == 'x86_64'
+        shell: bash
+        run: |
+          INTERCEPTION_VERSION="v1.0.1"
+          INTERCEPTION_ZIP="Interception.zip"
+          INTERCEPTION_URL="https://github.com/oblitum/Interception/releases/download/$INTERCEPTION_VERSION/Interception.zip"
+
+          curl -L "$INTERCEPTION_URL" -o "$INTERCEPTION_ZIP"
+          unzip -q "$INTERCEPTION_ZIP" -d interception
+          mkdir -p install/resource/base/Dll
+          cp interception/Interception/library/x64/interception.dll install/resource/base/Dll/interception.dll
+
       - uses: actions/upload-artifact@v4
         with:
           name: MaaLK-${{ matrix.os }}-${{ matrix.arch }}
