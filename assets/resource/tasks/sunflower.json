@@ -1,0 +1,44 @@
+{
+    "task": [
+        {
+            "name": "刷向阳花",
+            "entry": "Sunflower_Entry",
+            "option": [
+                "刷花模式"
+            ],
+            "group": [
+                "daily"
+            ]
+        }
+    ],
+    "option": {
+        "刷花模式": {
+            "type": "select",
+            "default_case": "完整前置",
+            "cases": [
+                {
+                    "name": "完整前置",
+                    "label": "完整前置",
+                    "pipeline_override": {
+                        "Sunflower_Entry": {
+                            "attach": {
+                                "mode": "full"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "只鞠躬循环",
+                    "label": "只鞠躬循环",
+                    "pipeline_override": {
+                        "Sunflower_Entry": {
+                            "attach": {
+                                "mode": "bow_only"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

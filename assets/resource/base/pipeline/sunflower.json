@@ -1,0 +1,13 @@
+{
+    "Sunflower_Entry": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "SunflowerCycleAct",
+        "post_delay": 200,
+        "timeout": -1,
+        "next": "Sunflower_Entry",
+        "attach": {
+            "mode": "full"
+        }
+    }
+}

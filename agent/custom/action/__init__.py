@@ -12,6 +12,7 @@ ACTION_MODULES = (
     "stone_detect",
     "stone_mine",
     "map_teleport",
+    "sunflower",
     "interception",
 )
 

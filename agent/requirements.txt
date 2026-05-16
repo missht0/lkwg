@@ -1,1 +1,2 @@
 maafw
+Pillow

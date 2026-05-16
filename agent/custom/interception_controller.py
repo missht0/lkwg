@@ -649,6 +649,32 @@ class InterceptionController:
         time.sleep(delay)
         return True
 
+    def left_down(self, delay=0.0):
+        if self.mouse_device is None:
+            return False
+
+        self._send_mouse_event(
+            INTERCEPTION_MOUSE_LEFT_BUTTON_DOWN,
+            INTERCEPTION_MOUSE_MOVE_RELATIVE,
+            x=0,
+            y=0
+        )
+        time.sleep(delay)
+        return True
+
+    def left_up(self, delay=0.0):
+        if self.mouse_device is None:
+            return False
+
+        self._send_mouse_event(
+            INTERCEPTION_MOUSE_LEFT_BUTTON_UP,
+            INTERCEPTION_MOUSE_MOVE_RELATIVE,
+            x=0,
+            y=0
+        )
+        time.sleep(delay)
+        return True
+
     def touch_down(self, x, y, delay=0.05):
         if self.mouse_device is None:
             return False
@@ -671,6 +697,19 @@ class InterceptionController:
             0,
             INTERCEPTION_MOUSE_MOVE_ABSOLUTE,
             x=ix, y=iy
+        )
+        time.sleep(delay)
+        return True
+
+    def move_relative(self, dx, dy, delay=0.02):
+        if self.mouse_device is None:
+            return False
+
+        self._send_mouse_event(
+            0,
+            INTERCEPTION_MOUSE_MOVE_RELATIVE,
+            x=int(dx),
+            y=int(dy)
         )
         time.sleep(delay)
         return True
