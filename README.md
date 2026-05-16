@@ -67,27 +67,34 @@ MaaLK 是一个基于 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 的
 
 如果使用正式 tag 发布，也可以从 `Releases` 页面下载对应的 zip 包。
 
-### 2. Python 运行依赖
+### 2. 运行依赖说明
 
-GitHub Actions 生成的正式包已经内置 Windows x64 Python 运行时和 Agent 依赖，正常情况下不需要手动安装 Python 包。
+从 GitHub Actions 下载的 `MaaLK-win-x86_64` 已经内置以下内容，普通使用者不需要额外安装：
 
-如果你是从源码运行，或想手动修复依赖，可以在项目/安装包目录执行：
+- MFAAvalonia 图形界面。
+- MaaFramework 运行库。
+- Windows x64 Python 运行时。
+- Agent 所需 Python 依赖。
+- `interception.dll` 用户态库。
+
+仍然需要手动安装的是 Interception 驱动本体。它是 Windows 内核驱动，必须由使用者在本机安装一次并重启，不能只靠正式包内置 DLL 完成。
+
+正式包保留了 `agent/bootstrap.py` 和日志输出。若 Agent 启动失败，可以查看：
+
+```powershell
+Get-Content .\agent\logs\bootstrap_*.log -Tail 200
+Get-Content .\agent\logs\agent_*.log -Tail 200
+```
+
+如果你是从源码运行，而不是使用 Actions 产物，需要自己准备 Python 环境并安装 Agent 依赖：
 
 ```powershell
 python -m pip install -r .\agent\requirements.txt
 ```
 
-如果你的电脑同时装了多个 Python，也可以使用：
-
-```powershell
-py -3 -m pip install -r .\agent\requirements.txt
-```
-
-正式包仍保留 `agent/bootstrap.py`：如果内置依赖缺失，它会尝试把依赖安装到 `agent/.deps` 作为兜底。
-
 ### 3. 安装 Interception 驱动
 
-本项目的游戏内输入依赖 Interception 驱动。首次使用前需要安装一次，并重启电脑。
+本项目的游戏内输入依赖 Interception 驱动。正式包已经内置 `interception.dll`，但首次使用前仍需要安装驱动本体，并重启电脑。
 
 1. 下载 [Interception](https://github.com/oblitum/Interception)。
 2. 解压后，以管理员身份打开 PowerShell 或 CMD。
@@ -144,7 +151,7 @@ npm ci
 npx @nekosu/maa-tools check
 ```
 
-本地打包需要先准备 MaaFramework 和 MFAAvalonia 依赖，普通使用者建议直接下载 GitHub Actions 产物。
+本地打包需要先准备 MaaFramework 和 MFAAvalonia 依赖；正式包还会在 GitHub Actions 中自动打入 Windows Python 运行时、Agent 依赖和 `interception.dll`。普通使用者建议直接下载 GitHub Actions 产物。
 
 ## 项目结构
 
@@ -164,7 +171,7 @@ npx @nekosu/maa-tools check
 - [MaaFramework](https://github.com/MaaXYZ/MaaFramework)：核心自动化框架。
 - [MFAAvalonia](https://github.com/SweetSmellFox/MFAAvalonia)：图形化任务管理器。
 - [M9A](https://github.com/MAA1999/M9A)：Maa 项目组织方式和实践参考。
-- [Interception](https://github.com/oblitum/Interception)：底层键鼠输入驱动。
+- [Interception](https://github.com/oblitum/Interception)：底层键鼠输入驱动与用户态 DLL。
 - 原 AHK 脚本：`luoke_mode2.ahk` 与 `luoke_clicker.ahk` 为向阳花和连点器迁移提供了基础流程。
 
 ## License
