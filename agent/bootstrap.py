@@ -9,9 +9,12 @@ MFA identifier argument.
 from __future__ import annotations
 
 import importlib.util
+import os
 import runpy
 import subprocess
 import sys
+import traceback
+from datetime import datetime
 from pathlib import Path
 
 
@@ -23,6 +26,41 @@ MAIN = AGENT_DIR / "main.py"
 REQUIRED_MODULES = ("maa", "numpy")
 
 
+class _Tee:
+    def __init__(self, log_file, original):
+        self._log_file = log_file
+        self._original = original
+
+    def write(self, text):
+        self._log_file.write(text)
+        self._log_file.flush()
+        if self._original:
+            self._original.write(text)
+            self._original.flush()
+
+    def flush(self):
+        self._log_file.flush()
+        if self._original:
+            self._original.flush()
+
+
+def _setup_logging():
+    log_dir = AGENT_DIR / "logs"
+    log_dir.mkdir(exist_ok=True)
+    log_path = log_dir / f"bootstrap_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    log_file = open(log_path, "a", encoding="utf-8")
+    sys.stdout = _Tee(log_file, sys.stdout)
+    sys.stderr = _Tee(log_file, sys.stderr)
+    print(f"=== Bootstrap started at {datetime.now().isoformat()} ===")
+    print(f"PID: {os.getpid()}")
+    print(f"CWD: {os.getcwd()}")
+    print(f"argv: {sys.argv}")
+    print(f"Python: {sys.executable} {sys.version}")
+    print(f"Agent dir: {AGENT_DIR}")
+    print(f"Deps dir: {DEPS_DIR}")
+    return log_file
+
+
 def _prepend_deps_path() -> None:
     if DEPS_DIR.exists():
         sys.path.insert(0, str(DEPS_DIR))
@@ -30,7 +68,12 @@ def _prepend_deps_path() -> None:
 
 def _deps_ready() -> bool:
     _prepend_deps_path()
-    return all(importlib.util.find_spec(module) is not None for module in REQUIRED_MODULES)
+    missing = [module for module in REQUIRED_MODULES if importlib.util.find_spec(module) is None]
+    if missing:
+        print(f"[Bootstrap] Missing modules: {missing}")
+        return False
+    print("[Bootstrap] Dependencies are ready.")
+    return True
 
 
 def _install_deps() -> None:
@@ -55,14 +98,23 @@ def _install_deps() -> None:
 
 
 def main() -> None:
-    if not _deps_ready():
-        _install_deps()
+    log_file = _setup_logging()
+    try:
         if not _deps_ready():
-            missing = [m for m in REQUIRED_MODULES if importlib.util.find_spec(m) is None]
-            raise RuntimeError(f"Agent dependencies are still missing: {missing}")
+            _install_deps()
+            if not _deps_ready():
+                missing = [m for m in REQUIRED_MODULES if importlib.util.find_spec(m) is None]
+                raise RuntimeError(f"Agent dependencies are still missing: {missing}")
 
-    sys.argv = [str(MAIN), *sys.argv[1:]]
-    runpy.run_path(str(MAIN), run_name="__main__")
+        sys.argv = [str(MAIN), *sys.argv[1:]]
+        print(f"[Bootstrap] Running main: {sys.argv}")
+        runpy.run_path(str(MAIN), run_name="__main__")
+    except Exception:
+        print("[Bootstrap] FATAL ERROR")
+        print(traceback.format_exc())
+        raise
+    finally:
+        log_file.close()
 
 
 if __name__ == "__main__":
