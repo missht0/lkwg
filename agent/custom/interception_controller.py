@@ -464,6 +464,20 @@ class InterceptionController:
         self._window_hwnd = hwnd
         self._update_window_rect()
 
+    def activate_window(self):
+        if self._window_hwnd is None:
+            return False
+
+        user32 = ctypes.windll.user32
+        if not user32.IsWindow(self._window_hwnd):
+            return False
+
+        # SW_RESTORE: restore if minimized before trying to foreground it.
+        user32.ShowWindow(self._window_hwnd, 9)
+        user32.SetForegroundWindow(self._window_hwnd)
+        self._update_window_rect()
+        return True
+
     def _update_window_rect(self):
         if self._window_hwnd is None:
             self._window_rect = None

@@ -1,3 +1,11 @@
+"""稀兽花种任务流程。
+
+1. RareBeast_Reset 清空技能游标和回合计数。
+2. RareBeastWaitAct 循环截图，等待技能 1 可用并继续战斗。
+3. 如果检测到捕捉 W，则选择目标、按空格确认捕捉，等待奖励提示后按 ESC 关闭并结束任务。
+4. RareBeastAct 按用户配置的技能顺序执行一次技能/聚能/背包操作，再回到等待节点。
+"""
+
 import time
 
 from maa.agent.agent_server import AgentServer
@@ -28,6 +36,7 @@ _MAIN_ACTION_LABELS = {
 class RareBeastReset(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 新任务开始时重置战斗技能游标。
         RareBeastAct._skill_index = 0
         RareBeastAct._round_count = 0
         print("[RareBeast] 状态重置")
@@ -38,6 +47,7 @@ class RareBeastReset(CustomAction):
 class RareBeastWaitAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 等待阶段优先检测捕捉 W；没有 W 时再看技能 1 是否可用。
         ctrl = context.tasker.controller
         _update_image_size(ctrl)
         ic = get_controller()
@@ -51,6 +61,7 @@ class RareBeastWaitAct(CustomAction):
                 continue
 
             w_result = context.run_recognition(
+                # W 出现代表进入捕捉阶段，后续不再继续普通战斗循环。
                 "RareBeastWDetect",
                 image,
                 pipeline_override={
@@ -73,6 +84,7 @@ class RareBeastWaitAct(CustomAction):
 
                 print("[RareBeast] 等待获得奖励...")
                 for reward_attempt in range(30):
+                    # 捕捉后等待奖励提示，避免 ESC 太早导致奖励界面未完成。
                     ctrl.post_screencap().wait()
                     reward_image = ctrl.cached_image
                     if reward_image is None:
@@ -100,6 +112,7 @@ class RareBeastWaitAct(CustomAction):
                 return False
 
             skill1_result = context.run_recognition(
+                # 技能 1 可见时交给 RareBeastAct 执行一轮技能。
                 "RareBeastSkill1Detect",
                 image,
                 pipeline_override={
@@ -126,6 +139,7 @@ class RareBeastAct(CustomAction):
     _round_count = 0
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 每次只消费技能队列中的一个主动作，下一轮继续从保存的游标执行。
         ctrl = context.tasker.controller
         _update_image_size(ctrl)
         ic = get_controller()
@@ -149,6 +163,7 @@ class RareBeastAct(CustomAction):
         while idx < len(skill_order):
             ch = skill_order[idx]
             if ch in ("q", "Q"):
+                # 背包段处理多个道具键，完成后回到等待技能 1 的节点。
                 idx = self._exec_backpack(context, ic, skill_order, idx)
                 continue
             if ch in MAIN_ACTIONS:
@@ -169,6 +184,7 @@ class RareBeastAct(CustomAction):
         return False
 
     def _exec_backpack(self, context, ic, skill_order, start_idx):
+        # 背包子流程：打开背包、按道具键、等待 r 关闭背包并恢复战斗检测。
         print("[RareBeast] >>> 打开背包 (q)")
         ic.click_key(CHAR_TO_VK["q"])
         time.sleep(0.8)

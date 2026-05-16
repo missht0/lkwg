@@ -1,2 +1,2 @@
 maafw
-Pillow
+numpy

@@ -1,11 +1,12 @@
 {
     "task": [
-        {
-            "name": "战斗脱离",
-            "entry": "Battle_RunEntry",
-            "option": [
-                "战斗脱离",
-                "脱离方式"
+    {
+      "name": "战斗脱离",
+      "entry": "Battle_RunEntry",
+      "doc": "流程：识别战斗界面的 ESC/脱离入口 -> 按选择的方式点击脱离入口或按 ESC -> 点击确认 -> 根据配置只执行一次或继续循环检测。",
+      "option": [
+        "战斗脱离",
+        "脱离方式"
             ],
             "group": ["demo"]
         }

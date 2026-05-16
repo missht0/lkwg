@@ -1,94 +1,170 @@
 # MaaLK
 
-基于 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 的洛克王国：世界自动化工具。
+MaaLK 是一个基于 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 的《洛克王国：世界》自动化学习项目。
+
+本 fork 目前只保留少量自用/学习性质任务，重点用于研究 MaaFramework Pipeline、自定义 Agent、图像识别和 Windows 输入模拟。
+
+## 仅供学习声明
+
+本项目仅用于学习、研究和技术交流，内容包括自动化流程编排、图像识别、MaaFramework 插件式开发、Windows 输入模拟等方向。
+
+请勿将本项目用于商业用途、破坏游戏公平性、影响他人体验或违反相关服务条款的场景。使用者应自行承担运行脚本、安装驱动、连接游戏窗口和修改系统输入组件带来的风险。
+
+《洛克王国：世界》及相关素材、名称、商标归其权利方所有。本项目与游戏官方无关。
 
 ## 功能
 
-### 自动战斗
+当前只保留以下任务：
 
-通过技能顺序字符串配置每回合操作，支持技能选择、聚能、背包物品使用。
+| 任务 | 说明 |
+| --- | --- |
+| 刷向阳花 | 从原 AHK 脚本迁移而来，支持完整前置和只鞠躬循环两种模式 |
+| 随机连点器 | 从原 AHK 连点脚本迁移而来，在当前鼠标位置执行随机间隔左键点击 |
+| 自动聚能 | 识别聚能图标后点击，或按配置改为按 `x` |
+| 战斗脱离 | 识别战斗脱离入口，点击或按 `Esc` 后确认退出 |
+| 传说精灵 | 按技能顺序执行普通战斗，可选使用印记 |
+| 精灵首领 | 支持普通阶段、特殊阶段技能顺序，以及奖励阶段印记处理 |
+| 稀兽花种 | 按技能顺序战斗，检测到捕捉提示后执行捕捉和领奖流程 |
 
-**字符串语法：**
+## 技能顺序语法
+
+传说精灵、精灵首领、稀兽花种使用同一套技能顺序语法。
 
 | 字符 | 含义 |
-|------|------|
-| `1`-`4` | 选择技能 / 背包中使用进化之力(`1`)或能量瓶(`2`) |
-| `x` | 聚能 |
-| `q` | 打开背包 |
-| `r` | 关闭背包（返回技能选择界面） |
+| --- | --- |
+| `1`-`4` | 使用对应技能；在背包段中表示使用对应物品 |
+| `x` / `X` | 聚能 |
+| `q` / `Q` | 打开背包 |
+| `r` / `R` | 关闭背包并回到技能界面 |
 
-**每回合结构：** `[背包操作]* + [主行动]`
+重复语法：
 
-- 主行动每回合只能有1个（技能 `1`-`4` 或聚能 `x`）
-- 背包操作 `q→物品→r` 不占行动格，只能在主行动之前
+| 写法 | 含义 | 示例 |
+| --- | --- | --- |
+| `|操作|次数` | 重复指定次数 | `|1x|3` 展开为 `1x1x1x` |
+| `||操作` | 近似无限循环 | `||1x` 会反复执行 `1x` |
+| `|操作|a` | 近似无限循环 | `|1x|a` 会反复执行 `1x` |
 
-**重复语法：**
-
-| 语法 | 含义 | 示例 | 展开 |
-|------|------|------|------|
-| `|操作|次数` | 重复指定次数 | `\|1x\|3` | `1x1x1x` |
-| `\|\|操作` | 无限循环 | `\|\|1x` | `1x1x1x...` |
-
-**配置示例：**
+常用示例：
 
 | 输入 | 含义 |
-|------|------|
-| `\|\|1x` | 每回合技能1+聚能，无限循环 |
-| `\|\|q2rx` | 先用能量瓶再技能1聚能，无限循环 |
-| `3x4x\|\|1x` | 先分别用技能3、4各聚能一次，然后技能1+聚能无限循环 |
-| `\|q1r\|2x` | 前2回合用进化之力+聚能，之后无限聚能(可接`\|\|x`) |
+| --- | --- |
+| `||1x` | 每轮使用技能 1 后聚能 |
+| `||q2rx` | 打开背包使用 2 号物品，关闭背包后聚能 |
+| `3x4x||1x` | 先执行技能 3/4 与聚能，再循环技能 1 + 聚能 |
 
-### 挖矿放宠
+## 安装流程
 
-YOLO 神经网络模型检测矿石，识别后自动按住鼠标挖矿，挖矿完成后自动放出宠物并轮换切换。
+### 1. 下载安装包
 
-### 自动放宠
+推荐从 GitHub Actions 下载最新构建产物：
 
-检测宠物槽位状态，优先放出未释放宠物，全部放出后按键轮换。
+1. 打开仓库的 `Actions` 页面。
+2. 进入 `install` 工作流。
+3. 选择最新一次成功运行。
+4. 在 `Artifacts` 中下载 `MaaLK-win-x86_64`。
+5. 解压到一个固定目录，例如 `D:\Apps\MaaLK`。
 
-### 战斗脱离
+如果使用正式 tag 发布，也可以从 `Releases` 页面下载对应的 zip 包。
 
-挖矿放宠过程中检测到战斗自动 ESC 退出，支持单次脱离和持续后台监控两种模式。
+### 2. 安装 Python 运行依赖
 
-### 石头检测
+本项目的自定义 Agent 使用 Python 运行。安装包不会内置 Python，请先安装 Python 3.10 或更新版本，并确保 `python` 可以在命令行中运行。
 
-识别 6 种矿石（黑石、蓝珊瑚、蓝石、紫石、红珊瑚、黄石）。
+在安装包解压目录执行：
 
-### 自动启动
+```powershell
+python -m pip install -r .\agent\requirements.txt
+```
 
-模板匹配检测游戏状态并自动点击进入。
+如果你的电脑同时装了多个 Python，也可以使用：
 
-### 专注能量
+```powershell
+py -3 -m pip install -r .\agent\requirements.txt
+```
 
-检测并点击专注能量按钮，支持按键 x 或点击两种方式。
+### 3. 安装 Interception 驱动
 
-### 购物
+本项目的游戏内输入依赖 Interception 驱动。首次使用前需要安装一次，并重启电脑。
 
-自动购买物品，支持勾选筛选（球、秘药、粉尘、果），OCR 子串匹配购物选项。
+1. 下载 [Interception](https://github.com/oblitum/Interception)。
+2. 解压后，以管理员身份打开 PowerShell 或 CMD。
+3. 进入 `command line installer` 目录。
+4. 执行：
 
-## 技术架构
+```powershell
+.\install-interception.exe /install
+```
 
-- **Interception 驱动**：所有键盘鼠标输入使用 Interception 内核驱动发送底层扫描码，绕过游戏输入保护
-- **M9A 风格模块化**：`action/` 和 `reco/` 子包按功能拆分，`@AgentServer` 装饰器注册，`register_all()` 集中加载
-- **Pipeline 状态机**：MaaFramework JSON Pipeline 驱动流程控制，OCR/模板匹配/神经网络检测驱动状态转换
+5. 重启电脑。
 
-## 可配置项
+卸载驱动时使用：
 
-- 自动战斗：技能顺序字符串（支持重复语法）
-- 挖矿：按住时长、轮询间隔、检测间隔
-- 聚能：按键 x 或点击方式
-- 战斗脱离：单次/持续监控、点击/按键 ESC
+```powershell
+.\install-interception.exe /uninstall
+```
 
-## 开发
+然后同样需要重启。
 
-请阅读[如何开发](./docs/zh_cn/develop/how_to_develop.md)
+### 4. 启动 MaaLK
 
-## 常见问题
+1. 打开解压目录中的 `MFAAvalonia.exe`。
+2. 资源类型选择 `桌面`。
+3. 控制器类型选择 `桌面端`。
+4. 当前控制器选择《洛克王国：世界》窗口。
+5. 勾选需要执行的任务。
+6. 建议先在 MFA 里设置全局启动/停止快捷键，然后切回游戏窗口后用快捷键启动任务。
 
-请阅读[常见问题](./docs/zh_cn/develop/faq.md)
+Interception 发送的是真实键鼠输入，通常需要游戏窗口处于前台或能够被激活。若任务开始后游戏内没有动作，先确认：
+
+- 已安装驱动并重启。
+- 游戏窗口标题能被识别。
+- MFA 日志中没有 Agent 启动失败。
+- 当前控制器选中的是游戏窗口。
+- 以管理员权限启动 MFA 后再试一次。
+
+## 本地开发
+
+```powershell
+git clone https://github.com/missht0/lkwg.git
+cd lkwg
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r tools\requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r agent\requirements.txt
+npm ci
+```
+
+常用校验：
+
+```powershell
+.\.venv\Scripts\python.exe -m py_compile agent\custom\action\*.py agent\custom\reco\*.py agent\custom\interception_controller.py
+.\.venv\Scripts\python.exe tools\validate_schema.py --schema-dir deps\tools --resource-dirs assets\resource\base\pipeline --interface-files assets\interface.json --task-dirs assets\resource\tasks
+npx @nekosu/maa-tools check
+```
+
+本地打包需要先准备 MaaFramework 和 MFAAvalonia 依赖，普通使用者建议直接下载 GitHub Actions 产物。
+
+## 项目结构
+
+| 路径 | 说明 |
+| --- | --- |
+| `assets/interface.json` | 项目入口配置，声明控制器、资源和任务导入 |
+| `assets/resource/tasks` | 任务入口和 UI 配置 |
+| `assets/resource/base/pipeline` | MaaFramework Pipeline 流程 |
+| `agent/main.py` | Agent 子进程入口 |
+| `agent/custom/action` | 自定义动作 |
+| `agent/custom/interception_controller.py` | Interception 输入控制封装 |
+| `.github/workflows/install.yml` | GitHub Actions 打包流程 |
 
 ## 鸣谢
 
-- **[MaaFramework](https://github.com/MaaXYZ/MaaFramework)** — 基于图像识别的自动化黑盒测试框架，本项目的核心驱动
-- **[M9A](https://github.com/MAA1999/M9A)** — 重返未来：1999 小助手，本项目的模块化架构参考
-- **[Interception](https://github.com/oblitum/Interception)** — 输入设备拦截与控制 API，本项目用于绕过游戏输入保护
+- [krendluck/lkwg](https://github.com/krendluck/lkwg)：原项目参考来源。
+- [MaaFramework](https://github.com/MaaXYZ/MaaFramework)：核心自动化框架。
+- [MFAAvalonia](https://github.com/SweetSmellFox/MFAAvalonia)：图形化任务管理器。
+- [M9A](https://github.com/MAA1999/M9A)：Maa 项目组织方式和实践参考。
+- [Interception](https://github.com/oblitum/Interception)：底层键鼠输入驱动。
+- 原 AHK 脚本：`luoke_mode2.ahk` 与 `luoke_clicker.ahk` 为向阳花和连点器迁移提供了基础流程。
+
+## License
+
+本项目沿用仓库中的 [MIT License](./LICENSE)。

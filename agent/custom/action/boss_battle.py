@@ -1,3 +1,12 @@
+"""精灵首领自动战斗任务流程。
+
+1. BossBattle_Reset 清空技能游标和回合计数。
+2. BossBattle_WaitSkill1 等待己方技能 1 可用，随后进入 BossBattleAct。
+3. 普通阶段按技能顺序执行一次技能/聚能/背包操作。
+4. 若截图中检测到 z，则切换到特殊阶段，按特殊技能顺序出手，看到 Space 时释放并结束当前轮。
+5. 战斗结束后可按住 W 找奖励/宝藏入口，再按配置尝试使用印记并退出奖励界面。
+"""
+
 import time
 
 import numpy as np
@@ -33,6 +42,7 @@ _HOLD_W_TIMEOUT = 15
 class BossBattleReset(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 新一轮首领任务开始时重置普通阶段技能游标。
         BossBattleAct._skill_index = 0
         BossBattleAct._round_count = 0
         print("[BossBattle] 状态重置")
@@ -46,6 +56,7 @@ class BossBattleAct(CustomAction):
     _round_count = 0
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 先读取普通阶段和特殊阶段两套技能顺序，二者共用同一套展开规则。
         ctrl = context.tasker.controller
         _update_image_size(ctrl)
         ic = get_controller()
@@ -60,6 +71,7 @@ class BossBattleAct(CustomAction):
         ctrl.post_screencap().wait()
         image = ctrl.cached_image
         if image is not None:
+            # 检测到 z 说明首领进入特殊阶段，立即切到特殊阶段流程。
             z_result = context.run_recognition(
                 "BossZDetect",
                 image,
@@ -89,6 +101,7 @@ class BossBattleAct(CustomAction):
         while idx < len(skill_order):
             ch = skill_order[idx]
             if ch in ("q", "Q"):
+                # 背包段会临时离开技能栏，执行完后再等待技能 1 回到可操作状态。
                 idx = self._exec_backpack(context, ic, skill_order, idx)
                 continue
             if ch in MAIN_ACTIONS:
@@ -110,6 +123,7 @@ class BossBattleAct(CustomAction):
         return False
 
     def _exec_special_phase(self, context, ctrl, ic, special_skill_order):
+        # 特殊阶段持续看 Space 提示；没有 Space 时按配置的特殊技能顺序出手。
         if not special_skill_order:
             print("[BossBattle] 特殊阶段技能顺序为空，跳过")
             return True
@@ -125,6 +139,7 @@ class BossBattleAct(CustomAction):
                 continue
 
             result = context.run_recognition(
+                # Space 提示出现时优先释放，释放后结束本轮等待下一次 pipeline 调度。
                 "BossSpecialSpaceDetect",
                 image,
                 pipeline_override={
@@ -170,6 +185,7 @@ class BossBattleAct(CustomAction):
         return True
 
     def _exec_backpack(self, context, ic, skill_order, start_idx):
+        # 背包子流程：q 打开背包，使用道具键；遇到 r/非法字符时关闭并回到首领等待节点。
         print("[BossBattle] >>> 打开背包 (q)")
         ic.click_key(CHAR_TO_VK["q"])
         time.sleep(0.8)
@@ -215,6 +231,7 @@ class BossBattleAct(CustomAction):
 class BossHoldWAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 奖励阶段需要按住 W 前进，直到 OCR 识别到目标入口文本或超时。
         ctrl = context.tasker.controller
         _update_image_size(ctrl)
         ic = get_controller()
@@ -262,6 +279,7 @@ class BossHoldWAct(CustomAction):
 class BossUseMarkAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 奖励界面的印记处理：确认当前是契约印记界面后，点确认并按 ESC 退出。
         node_obj = context.get_node_object("BossBattle_UseMark")
         attach = getattr(node_obj, "attach", {}) if node_obj else {}
         use_mark = str(attach.get("use_mark", "false")).lower() == "true"

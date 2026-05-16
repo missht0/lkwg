@@ -1,0 +1,16 @@
+{
+    "RandomClicker_Entry": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "RandomClickerAct",
+        "post_delay": 0,
+        "timeout": -1,
+        "next": "RandomClicker_Entry",
+        "attach": {
+            "hold_min": 30,
+            "hold_max": 60,
+            "interval_min": 800,
+            "interval_max": 1200
+        }
+    }
+}

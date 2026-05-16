@@ -1,3 +1,12 @@
+"""传说精灵自动战斗任务流程。
+
+1. AutoBattle_Reset 清空技能游标和回合计数。
+2. AutoBattle_WaitReady 持续截图，先判断战斗是否结束，再等待技能 1 出现。
+3. AutoBattleAct 按用户配置的技能顺序执行一次动作；支持 1-4 技能、x 聚能、q/r 背包开关。
+4. Pipeline 回到等待节点，等下一轮技能可用后继续执行。
+5. 如启用印记，战斗结束后会尝试打开印记、确认并选择目标。
+"""
+
 import re
 import time
 
@@ -43,6 +52,7 @@ _WAIT_TIMEOUT = 30
 
 
 def _expand_skill_order(s):
+    # 把 |1x|3、||1x、|1x|a 这类简写展开为可逐字符执行的技能队列。
     s = re.sub(r'\|([^|]+)\|a', lambda m: m.group(1) * _INFINITE_REPEAT, s)
     s = re.sub(r'\|\|([^|]+)', lambda m: m.group(1) * _INFINITE_REPEAT, s)
     s = re.sub(r'\|([^|]+)\|(\d+)', lambda m: m.group(1) * int(m.group(2)), s)
@@ -50,6 +60,7 @@ def _expand_skill_order(s):
 
 
 def _check_mark_color(image):
+    # 点击印记后用固定区域颜色做二次确认，避免误点后继续走确认流程。
     bgr = np.asarray(image, dtype=np.uint8)
     x, y, w, h = _MARK_COLOR_ROI
     roi = bgr[y:y + h, x:x + w]
@@ -62,6 +73,7 @@ def _check_mark_color(image):
 class AutoBattleReset(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 新任务开始时重置静态游标，避免沿用上一次任务停下的位置。
         AutoBattleAct._skill_index = 0
         AutoBattleAct._round_count = 0
         print("[AutoBattle] 状态重置")
@@ -72,6 +84,7 @@ class AutoBattleReset(CustomAction):
 class AutoBattleWaitAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 等待阶段有两个出口：发现确认按钮表示战斗结束；发现技能 1 表示可出手。
         ctrl = context.tasker.controller
         _update_image_size(ctrl)
 
@@ -122,6 +135,7 @@ class AutoBattleWaitAct(CustomAction):
 class AutoBattleUseMarkAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 印记是可选后处理：没启用时直接跳过，不影响普通战斗。
         node_obj = context.get_node_object("AutoBattle_UseMark")
         print(node_obj.attach)
         attach = getattr(node_obj, "attach", {}) if node_obj else {}
@@ -135,6 +149,7 @@ class AutoBattleUseMarkAct(CustomAction):
         ic = get_controller()
 
         for attempt in range(2):
+            # 点击印记后再截图校验颜色，最多试两次。
             print(f"[AutoBattle] >>> 点击印记图标 (尝试 {attempt + 1}/2)")
             ic.click(*_MARK_ICON_POS)
             time.sleep(0.5)
@@ -154,6 +169,7 @@ class AutoBattleUseMarkAct(CustomAction):
             return True
 
         confirm_result = context.run_recognition(
+            # 只有确认按钮被识别到时才继续选择目标，减少误触。
             "MarkConfirmDetect",
             image,
             pipeline_override={"MarkConfirmDetect": {
@@ -195,6 +211,7 @@ class AutoBattleAct(CustomAction):
     _round_count = 0
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        # 每次只执行技能队列中的一个主动作，然后把游标保存到类变量里等待下一轮。
         ctrl = context.tasker.controller
         _update_image_size(ctrl)
         ic = get_controller()
@@ -218,6 +235,7 @@ class AutoBattleAct(CustomAction):
         while idx < len(skill_order):
             ch = skill_order[idx]
             if ch in ("q", "Q"):
+                # 背包段可能包含多个道具键，执行完成后等待 R 关闭背包并回到战斗。
                 idx = self._exec_backpack(context, ic, skill_order, idx)
                 continue
             if ch in MAIN_ACTIONS:
@@ -238,6 +256,7 @@ class AutoBattleAct(CustomAction):
         return False
 
     def _exec_backpack(self, context, ic, skill_order, start_idx):
+        # 背包子流程：q 打开背包，连续使用道具键，遇到 r 或非法字符时关闭并回到战斗等待。
         print("[AutoBattle] >>> 打开背包 (q)")
         ic.click_key(CHAR_TO_VK["q"])
         time.sleep(0.8)

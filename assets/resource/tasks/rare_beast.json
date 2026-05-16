@@ -1,11 +1,12 @@
 {
     "task": [
-        {
-            "name": "稀兽花种",
-            "entry": "RareBeast_Entry",
-            "option": [
-                "Rare-技能顺序"
-            ],
+    {
+      "name": "稀兽花种",
+      "entry": "RareBeast_Entry",
+      "doc": "流程：重置技能状态 -> 等待技能 1 可用并按技能顺序战斗；若检测到捕捉 W，则选择目标并确认捕捉，等待获得奖励提示后按 ESC 关闭捕捉界面并结束。",
+      "option": [
+        "Rare-技能顺序"
+      ],
             "group": ["battle"]
         }
     ],

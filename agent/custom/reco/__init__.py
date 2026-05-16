@@ -1,11 +1,6 @@
 from importlib import import_module
 
-RECO_MODULES = (
-    "auto_launch",
-    "release_pet",
-    "stone_detect",
-    "stone_mine",
-)
+RECO_MODULES = ()
 
 
 def register_all():

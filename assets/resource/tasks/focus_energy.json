@@ -1,11 +1,12 @@
 {
     "task": [
-        {
-            "name": "自动聚能",
-            "entry": "Focus_EnergyEntry",
-            "option": [
-                "聚能方式"
-            ],
+    {
+      "name": "自动聚能",
+      "entry": "Focus_EnergyEntry",
+      "doc": "流程：识别聚能图标 -> 默认点击聚能图标，或按配置改为按 x 键 -> 稍作等待 -> 回到入口持续检测。",
+      "option": [
+        "聚能方式"
+      ],
             "group": ["demo"]
         }
     ],

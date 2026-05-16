@@ -1,11 +1,12 @@
 {
     "task": [
-        {
-            "name": "刷向阳花",
-            "entry": "Sunflower_Entry",
-            "option": [
-                "刷花模式"
-            ],
+    {
+      "name": "刷向阳花",
+      "entry": "Sunflower_Entry",
+      "doc": "流程：激活游戏窗口 -> 完整模式先打开地图并执行传送/交互前置；随后进入鞠躬循环，按 2、TAB、ESC、R、X 等键并夹带随机停顿/鼠标微动，直到任务被停止。",
+      "option": [
+        "刷花模式"
+      ],
             "group": [
                 "daily"
             ]
