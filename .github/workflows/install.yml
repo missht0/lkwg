@@ -15,6 +15,7 @@ on:
       - "**"
     paths:
       - ".github/workflows/install.yml"
+      - ".github/workflows/check.yml"
       - "README.md"
       - "assets/**"
       - "**.py"
@@ -23,6 +24,7 @@ on:
       - "**"
     paths:
       - ".github/workflows/install.yml"
+      - ".github/workflows/check.yml"
       - "README.md"
       - "assets/**"
       - "**.py"
