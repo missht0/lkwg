@@ -5,7 +5,6 @@ ACTION_MODULES = (
     "auto_battle",
     "boss_battle",
     "rare_beast",
-    "focus_energy",
     "sunflower",
     "clicker",
     "interception",

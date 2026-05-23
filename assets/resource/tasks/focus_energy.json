@@ -3,14 +3,41 @@
     {
       "name": "自动聚能",
       "entry": "Focus_EnergyEntry",
-      "doc": "流程：识别聚能图标 -> 默认点击聚能图标，或按配置改为按 x 键 -> 稍作等待 -> 回到入口持续检测。",
+      "doc": "流程：等待并识别聚能图标 -> 命中后点击聚能图标或按 x 键 -> 根据配置只执行一次或回到入口后台持续检测。",
       "option": [
+        "自动聚能",
         "聚能方式"
       ],
             "group": ["demo"]
         }
     ],
     "option": {
+        "自动聚能": {
+            "type": "select",
+            "default_case": "后台持续检测",
+            "cases": [
+                {
+                    "name": "只聚能一次",
+                    "label": "只聚能一次",
+                    "pipeline_override": {
+                        "Focus_EnergyEntry": {
+                            "next": []
+                        }
+                    }
+                },
+                {
+                    "name": "后台持续检测",
+                    "label": "后台持续检测",
+                    "pipeline_override": {
+                        "Focus_EnergyEntry": {
+                            "next": [
+                                "FocusEnergy_LoopWait"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
         "聚能方式": {
             "type": "select",
             "default_case": "点击方式",

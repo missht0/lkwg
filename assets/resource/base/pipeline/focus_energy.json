@@ -16,13 +16,6 @@
         },
         "post_delay": 300,
         "timeout": -1,
-        "next": "FocusEnergy_Click"
-    },
-    "FocusEnergy_Click": {
-        "recognition": "DirectHit",
-        "action": "Custom",
-        "custom_action": "FocusEnergyAct",
-        "post_delay": 500,
         "next": "FocusEnergy_LoopWait"
     },
     "FocusEnergy_LoopWait": {
