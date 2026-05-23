@@ -3,7 +3,7 @@
     {
       "name": "自动聚能",
       "entry": "Focus_EnergyEntry",
-      "doc": "流程：等待并识别聚能图标 -> 命中后点击聚能图标或按 x 键 -> 根据配置只执行一次或回到入口后台持续检测。",
+      "doc": "流程：后台持续检测时每轮主动截图检查聚能图标，命中后点击聚能图标或按 x 键，未命中也继续轮询；只聚能一次时会等待图标出现，执行一次后结束。",
       "option": [
         "自动聚能",
         "聚能方式"
@@ -21,6 +21,19 @@
                     "label": "只聚能一次",
                     "pipeline_override": {
                         "Focus_EnergyEntry": {
+                            "recognition": "TemplateMatch",
+                            "template": "Battle/Energy.png",
+                            "roi": [
+                                11,
+                                583,
+                                102,
+                                101
+                            ],
+                            "threshold": 0.7,
+                            "action": "Custom",
+                            "custom_action": "InterceptionInput",
+                            "post_delay": 300,
+                            "timeout": -1,
                             "next": []
                         }
                     }
@@ -30,6 +43,10 @@
                     "label": "后台持续检测",
                     "pipeline_override": {
                         "Focus_EnergyEntry": {
+                            "recognition": "DirectHit",
+                            "action": "Custom",
+                            "custom_action": "FocusEnergyPollAct",
+                            "post_delay": 1000,
                             "next": [
                                 "FocusEnergy_LoopWait"
                             ]
@@ -47,8 +64,6 @@
                     "label": "按键 x",
                     "pipeline_override": {
                         "Focus_EnergyEntry": {
-                            "action": "Custom",
-                            "custom_action": "InterceptionInput",
                             "custom_action_param": {
                                 "type": "click_key",
                                 "key": 88
@@ -61,8 +76,6 @@
                     "label": "点击方式",
                     "pipeline_override": {
                         "Focus_EnergyEntry": {
-                            "action": "Custom",
-                            "custom_action": "InterceptionInput",
                             "custom_action_param": {
                                 "type": "click_target"
                             }

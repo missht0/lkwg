@@ -1,25 +1,16 @@
 {
     "Focus_EnergyEntry": {
-        "recognition": "TemplateMatch",
-        "template": "Battle/Energy.png",
-        "roi": [
-            11,
-            583,
-            102,
-            101
-        ],
-        "threshold": 0.7,
+        "recognition": "DirectHit",
         "action": "Custom",
-        "custom_action": "InterceptionInput",
+        "custom_action": "FocusEnergyPollAct",
         "custom_action_param": {
             "type": "click_target"
         },
-        "post_delay": 300,
-        "timeout": -1,
+        "post_delay": 1000,
         "next": "FocusEnergy_LoopWait"
     },
     "FocusEnergy_LoopWait": {
-        "post_delay": 2000,
+        "post_delay": 1000,
         "next": "Focus_EnergyEntry"
     }
 }
