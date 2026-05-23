@@ -4,7 +4,7 @@
     "description": "这是一个使用 MaaFramework 创建的新项目。",
     "license": "MIT",
     "welcome": "首次使用！欢迎使用 MAA!",
-    "github": "https://github.com/krendluck/lkwg",
+    "github": "https://github.com/missht0/lkwg",
     "version": "0.1.0",
     "controller": [
         {

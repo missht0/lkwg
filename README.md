@@ -146,6 +146,23 @@ npx @nekosu/maa-tools check
 
 本地打包需要先准备 MaaFramework 和 MFAAvalonia 依赖；正式包还会在 GitHub Actions 中自动打入 Windows Python 运行时、Agent 依赖和 `interception.dll`。普通使用者建议直接下载 GitHub Actions 产物。
 
+## 发布与自动更新
+
+正式包的更新检测地址来自 `assets/interface.json` 中的 `github` 字段，当前指向：
+
+```text
+https://github.com/missht0/lkwg
+```
+
+需要推送正式更新时，创建并推送 `v*` 标签即可触发 GitHub Actions 自动打包并发布到 Releases：
+
+```powershell
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+用户侧 MFA 会通过该仓库的 Releases 检测新版本。普通分支 push 只生成 Actions 产物，不会作为正式自动更新发布。
+
 ## 项目结构
 
 | 路径 | 说明 |
