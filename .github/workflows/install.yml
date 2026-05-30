@@ -197,12 +197,14 @@ jobs:
           cp "interception/Interception/command line installer/install-interception.exe" install/driver/interception/install-interception.exe
           cp tools/driver/Install_Interception_Driver.bat install/Install_Interception_Driver.bat
           cp tools/driver/Uninstall_Interception_Driver.bat install/Uninstall_Interception_Driver.bat
+          cp tools/driver/Check_Interception_Driver.bat install/Check_Interception_Driver.bat
           python - <<'PY'
           from pathlib import Path
 
           for path in (
               Path("install/Install_Interception_Driver.bat"),
               Path("install/Uninstall_Interception_Driver.bat"),
+              Path("install/Check_Interception_Driver.bat"),
           ):
               text = path.read_text(encoding="utf-8")
               path.write_bytes(text.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\r\n").encode("utf-8"))

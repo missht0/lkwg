@@ -99,8 +99,11 @@ python -m pip install -r .\agent\requirements.txt
 1. 在 MaaLK 解压目录中双击 `Install_Interception_Driver.bat`。
 2. 在 Windows 弹出的管理员权限确认窗口中选择允许。
 3. 看到安装完成提示后，重启电脑。
+4. 重启后双击 `Check_Interception_Driver.bat`，看到 `Check passed` 才表示驱动可用。
 
 卸载驱动时双击 `Uninstall_Interception_Driver.bat`，完成后同样需要重启。
+
+安装、卸载和检测脚本会在 `logs` 目录写入 `interception_install.log`、`interception_uninstall.log` 和 `interception_check.log`。如果窗口一闪而过，可以直接查看这些日志。
 
 如果双击脚本失败，也可以手动运行：
 
